@@ -8,9 +8,13 @@ primary-api: "proxycheck"
 fallback-api: "iphub"
 
 # Cache para evitar consultas repetidas (em segundos)
+# 86400 segundos = 24 horas
+# Impede verificações de VPN repetidas para o mesmo IP dentro de 24 horas
 cache-time: 86400
 
 # Intervalo para limpeza do cache (em minutos)
+# 1440 minutos = 24 horas
+# Remove entradas de cache desatualizadas uma vez por dia
 cache-cleanup-interval: 1440
 
 # Logs de conexões detectadas como VPN
