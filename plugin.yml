@@ -1,0 +1,17 @@
+name: AntiVPN
+main: PocketDev\AntiVPN\Main
+version: 1.0.0
+api: [2.0.0]
+author: PocketDev
+description: Um plugin que impede jogadores de usar VPN para entrar no servidor
+commands:
+  antivpn:
+    description: Comandos administrativos do AntiVPN
+    permission: antivpn.admin
+permissions:
+  antivpn.admin:
+    description: Permite usar comandos administrativos do AntiVPN
+    default: op
+  antivpn.bypass:
+    description: Permite ignorar as verificações de VPN
+    default: false

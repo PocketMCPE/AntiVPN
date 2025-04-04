@@ -1,0 +1,36 @@
+# Configuração do AntiVPN
+
+# Mensagem para jogadores usando VPN
+kick-message: "§cVPN detectada! Por favor, desative sua VPN para jogar."
+
+# Escolha qual API de verificação utilizar (proxycheck, iphub)
+primary-api: "proxycheck"
+fallback-api: "iphub"
+
+# Cache para evitar consultas repetidas (em segundos)
+cache-time: 3600
+
+# Intervalo para limpeza do cache (em minutos)
+cache-cleanup-interval: 30
+
+# Logs de conexões detectadas como VPN
+enable-logs: true
+
+# Limite de tentativas por API antes de mudar para fallback
+api-retry-limit: 3
+
+# Configurações das APIs
+api:
+  proxycheck:
+    enabled: true
+    api-key: "YOUR_PROXYCHECK_API_KEY"
+    # Deixe em branco para usar versão gratuita
+
+  iphub:
+    enabled: true
+    api-key: "YOUR_IPHUB_API_KEY"
+
+# Whitelist de IPs (que serão ignorados na verificação)
+ip-whitelist:
+  - "127.0.0.1"
+  - "192.168.1.1"
