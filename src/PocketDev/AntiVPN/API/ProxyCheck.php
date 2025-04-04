@@ -47,7 +47,7 @@ class ProxyCheck {
                 'port' => 1,
                 'seen' => 1,
                 'days' => 7,
-                'tag' => 'PocketMineVPNChecker'
+                'tag' => 'PocketVPNChecker'
             ];
 
             if (!empty($this->apiKey)) {

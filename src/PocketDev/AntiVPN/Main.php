@@ -22,14 +22,23 @@ class Main extends PluginBase {
     /** @var VPNChecker */
     private $vpnChecker;
 
-    /** @var array */
+    /** @var array<string, array> */
     private $ipCache = [];
 
-    /** @var array */
+    /** @var array<string, callable> */
     private $pendingChecks = [];
 
+    /** @var string */
+    private $cacheFile;
+
+    /**
+     * Inicializa o plugin, carrega configurações, listeners e tarefas agendadas.
+     */
     public function onEnable() {
         @mkdir($this->getDataFolder());
+
+        $this->cacheFile = $this->getDataFolder() . "cache.json";
+        $this->loadCache();
 
         $this->saveDefaultConfig();
         $this->configManager = new ConfigManager($this);
@@ -41,7 +50,7 @@ class Main extends PluginBase {
             $this
         );
 
-        $cleanupInterval = $this->configManager->getCacheCleanupInterval() * 1200; // Converter minutos para ticks
+        $cleanupInterval = $this->configManager->getCacheCleanupInterval() * 1200;
         $this->getServer()->getScheduler()->scheduleRepeatingTask(
             new CacheCleanupTask($this),
             $cleanupInterval
@@ -51,24 +60,50 @@ class Main extends PluginBase {
     }
 
     /**
-     * @return ConfigManager
+     * Carrega o cache de IPs do arquivo.
      */
+    private function loadCache() {
+        if (file_exists($this->cacheFile)) {
+            try {
+                $content = file_get_contents($this->cacheFile);
+                $data = json_decode($content, true);
+
+                if (is_array($data)) {
+                    $this->ipCache = $data;
+                    $this->getLogger()->info("Cache de IP carregado: " . count($this->ipCache) . " entradas");
+                }
+            } catch (\Exception $e) {
+                $this->getLogger()->warning("Erro ao carregar cache: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Salva o cache de IPs em disco.
+     */
+    private function saveCache() {
+        try {
+            file_put_contents($this->cacheFile, json_encode($this->ipCache));
+        } catch (\Exception $e) {
+            $this->getLogger()->warning("Erro ao salvar cache: " . $e->getMessage());
+        }
+    }
+
+    /** @return ConfigManager */
     public function getConfigManager() {
         return $this->configManager;
     }
 
-    /**
-     * @return VPNChecker
-     */
+    /** @return VPNChecker */
     public function getVPNChecker() {
         return $this->vpnChecker;
     }
 
     /**
-     * Verifica se um IP está utilizando VPN
+     * Verifica se um IP está usando VPN com base no cache e chamadas diretas.
      *
      * @param string $ip
-     * @return bool|null true se for VPN, false se não for, null se não puder determinar
+     * @return bool
      */
     public function isVPN($ip) {
         if (isset($this->ipCache[$ip])) {
@@ -89,14 +124,16 @@ class Main extends PluginBase {
             'time' => time()
         ];
 
+        $this->saveCache();
+
         return $result;
     }
 
     /**
-     * Inicia uma verificação assíncrona de IP
+     * Executa uma checagem de VPN assíncrona e chama o callback ao finalizar.
      *
      * @param string $ip
-     * @param callable $callback Função a ser chamada quando a verificação terminar
+     * @param callable $callback
      */
     public function checkVPNAsync($ip, callable $callback) {
         if (isset($this->ipCache[$ip])) {
@@ -125,11 +162,11 @@ class Main extends PluginBase {
     }
 
     /**
-     * Processa o resultado de uma verificação assíncrona
+     * Processa o resultado de uma checagem assíncrona.
      *
      * @param string $taskId
      * @param string $ip
-     * @param bool|null $isVPN
+     * @param bool $isVPN
      * @param array $details
      */
     public function processAsyncResult($taskId, $ip, $isVPN, $details) {
@@ -139,6 +176,8 @@ class Main extends PluginBase {
             'details' => $details
         ];
 
+        $this->saveCache();
+
         if (isset($this->pendingChecks[$taskId])) {
             call_user_func($this->pendingChecks[$taskId], $ip, $isVPN, $details);
             unset($this->pendingChecks[$taskId]);
@@ -146,25 +185,38 @@ class Main extends PluginBase {
     }
 
     /**
-     * Limpa entradas antigas do cache
+     * Remove entradas antigas do cache de IPs.
      */
     public function cleanupCache() {
         $now = time();
         $cacheTime = $this->configManager->getCacheTime();
+        $cacheSize = count($this->ipCache);
+        $removed = 0;
 
         foreach ($this->ipCache as $ip => $data) {
             if ($now - $data['time'] >= $cacheTime) {
                 unset($this->ipCache[$ip]);
+                $removed++;
             }
         }
 
+        if ($removed > 0) {
+            $this->saveCache();
+        }
+
         if ($this->configManager->isLoggingEnabled()) {
-            $this->getLogger()->debug("Limpeza de cache concluída. Entradas restantes: " . count($this->ipCache));
+            $this->getLogger()->debug("Limpeza de cache concluída. Removidas: $removed. Restantes: " . count($this->ipCache));
         }
     }
 
     /**
-     * Implementação dos comandos
+     * Executa comandos do plugin como /antivpn.
+     *
+     * @param CommandSender $sender
+     * @param Command $command
+     * @param string $label
+     * @param array $args
+     * @return bool
      */
     public function onCommand(CommandSender $sender, Command $command, $label, array $args) {
         if (strtolower($command->getName()) !== "antivpn") {
@@ -184,6 +236,7 @@ class Main extends PluginBase {
             $sender->sendMessage(TF::YELLOW . "/antivpn clearcache " . TF::WHITE . "- Limpa o cache de verificações");
             $sender->sendMessage(TF::YELLOW . "/antivpn stats " . TF::WHITE . "- Exibe estatísticas das APIs");
             $sender->sendMessage(TF::YELLOW . "/antivpn whitelist <add|remove> <ip> " . TF::WHITE . "- Gerencia IPs na whitelist");
+            $sender->sendMessage(TF::YELLOW . "/antivpn savecache " . TF::WHITE . "- Força o salvamento do cache");
             return true;
         }
 
@@ -197,7 +250,13 @@ class Main extends PluginBase {
             case "clearcache":
                 $count = count($this->ipCache);
                 $this->ipCache = [];
+                $this->saveCache();
                 $sender->sendMessage(TF::GREEN . "Cache limpo! $count entradas removidas.");
+                break;
+
+            case "savecache":
+                $this->saveCache();
+                $sender->sendMessage(TF::GREEN . "Cache salvo manualmente com " . count($this->ipCache) . " entradas.");
                 break;
 
             case "stats":
@@ -317,10 +376,10 @@ class Main extends PluginBase {
     }
 
     /**
-     * Limpar cache ao desativar o plugin
+     * Executado quando o plugin é desativado.
      */
     public function onDisable() {
-        $this->ipCache = [];
+        $this->saveCache();
         $this->pendingChecks = [];
         $this->getLogger()->info(TF::RED . "AntiVPN desativado.");
     }
