@@ -82,17 +82,20 @@ nicknames-whitelist:
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `/antivpn` | Help menu |
-| `/antivpn check <player>` | Checks if a player is using VPN |
-| `/antivpn checkip <ip>` | Checks if an IP is using VPN |
-| `/antivpn reload` | Reloads the configuration |
-| `/antivpn clearcache` | Clears verification cache |
-| `/antivpn stats` | Displays API statistics |
+| Command                                 | Description |
+|-----------------------------------------|-------------|
+| `/antivpn`                              | Help menu |
+| `/antivpn check <player>`               | Checks if a player is using VPN |
+| `/antivpn checkip <ip>`                 | Checks if an IP is using VPN |
+| `/antivpn reload`                       | Reloads the configuration |
+| `/antivpn clearcache`                   | Clears verification cache |
+| `/antivpn stats`                        | Displays API statistics |
 | `/antivpn whitelist <add\|remove> <ip>` | Manages IP whitelist |
-| `/antivpn savecache` | Forces cache saving |
-| `/antivpn nickwhitelist <add\|remove> <nickname>` | Manages nickname whitelist |
+| `/antivpn savecache`                    | Forces cache saving |
+| `/antivpn setprimary <api>`             | Sets the primary API |
+| `/antivpn setfallback <api>`            | Sets the fallback API |
+| `/antivpn api <api> <enable\|disable>`  | Enables or disables an API |
+| `/antivpn setkey <api> <key>`           | Sets the key for an API |
 
 ### Permissions
 

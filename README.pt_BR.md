@@ -93,6 +93,10 @@ nicknames-whitelist:
 | `/antivpn whitelist <add\|remove> <ip>` | Gerencia IPs na whitelist              |
 | `/antivpn savecache` | Força o salvamento do cache            |
 | `/antivpn nickwhitelist <add\|remove> <nickname>` | Gerencia a lista de nicks permitidos   |
+| `/antivpn setprimary <api>`             | Define a API primária |
+| `/antivpn setfallback <api>`            | Define a API secundária |
+| `/antivpn api <api> <enable\|disable>`  | Ativa ou desativa uma API |
+| `/antivpn setkey <api> <key>`           | Define a chave para uma API |
 
 ### Permissões
 

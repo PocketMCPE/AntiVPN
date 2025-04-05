@@ -214,6 +214,88 @@ class ConfigManager {
     }
 
     /**
+     * Define a API primária
+     * @param string $api
+     * @return bool
+     */
+    public function setPrimaryApi($api) {
+        $validApis = ['proxycheck', 'iphub'];
+        if (!in_array($api, $validApis)) {
+            return false;
+        }
+
+        $this->config['primary-api'] = $api;
+        $this->saveConfig();
+        return true;
+    }
+
+    /**
+     * Define a API de fallback
+     * @param string $api
+     * @return bool
+     */
+    public function setFallbackApi($api) {
+        $validApis = ['proxycheck', 'iphub'];
+        if (!in_array($api, $validApis)) {
+            return false;
+        }
+
+        $this->config['fallback-api'] = $api;
+        $this->saveConfig();
+        return true;
+    }
+
+    /**
+     * Habilita ou desabilita uma API
+     * @param string $api
+     * @param bool $enabled
+     * @return bool
+     */
+    public function setApiEnabled($api, $enabled) {
+        $validApis = ['proxycheck', 'iphub'];
+        if (!in_array($api, $validApis)) {
+            return false;
+        }
+
+        if (!isset($this->config['api']) || !is_array($this->config['api'])) {
+            $this->config['api'] = [];
+        }
+
+        if (!isset($this->config['api'][$api]) || !is_array($this->config['api'][$api])) {
+            $this->config['api'][$api] = [];
+        }
+
+        $this->config['api'][$api]['enabled'] = (bool)$enabled;
+        $this->saveConfig();
+        return true;
+    }
+
+    /**
+     * Define a chave de API
+     * @param string $api
+     * @param string $key
+     * @return bool
+     */
+    public function setApiKey($api, $key) {
+        $validApis = ['proxycheck', 'iphub'];
+        if (!in_array($api, $validApis)) {
+            return false;
+        }
+
+        if (!isset($this->config['api']) || !is_array($this->config['api'])) {
+            $this->config['api'] = [];
+        }
+
+        if (!isset($this->config['api'][$api]) || !is_array($this->config['api'][$api])) {
+            $this->config['api'][$api] = ['enabled' => true];
+        }
+
+        $this->config['api'][$api]['api-key'] = $key;
+        $this->saveConfig();
+        return true;
+    }
+
+    /**
      * Salva as configurações no arquivo
      */
     private function saveConfig() {

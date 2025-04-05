@@ -238,6 +238,10 @@ class Main extends PluginBase {
             $sender->sendMessage(TF::YELLOW . "/antivpn whitelist <add|remove> <ip> " . TF::WHITE . "- Gerencia IPs na whitelist");
             $sender->sendMessage(TF::YELLOW . "/antivpn nickwhitelist <add|remove> <nickname> " . TF::WHITE . "- Gerencia nicknames na whitelist");
             $sender->sendMessage(TF::YELLOW . "/antivpn savecache " . TF::WHITE . "- Força o salvamento do cache");
+            $sender->sendMessage(TF::YELLOW . "/antivpn setprimary <api> " . TF::WHITE . "- Define a API primária");
+            $sender->sendMessage(TF::YELLOW . "/antivpn setfallback <api> " . TF::WHITE . "- Define a API secundária");
+            $sender->sendMessage(TF::YELLOW . "/antivpn api <api> <enable|disable> " . TF::WHITE . "- Ativa ou desativa uma API");
+            $sender->sendMessage(TF::YELLOW . "/antivpn setkey <api> <key> " . TF::WHITE . "- Define a chave para uma API");
             return true;
         }
 
@@ -393,6 +397,83 @@ class Main extends PluginBase {
                         $sender->sendMessage(TF::GREEN . "O IP $ip não parece estar usando VPN.");
                     }
                 });
+                break;
+
+            case "setprimary":
+                if (count($args) < 2) {
+                    $sender->sendMessage(TF::RED . "Uso: /antivpn setprimary <api>");
+                    $sender->sendMessage(TF::YELLOW . "APIs disponíveis: proxycheck, iphub");
+                    return true;
+                }
+
+                $api = strtolower($args[1]);
+                if ($this->configManager->setPrimaryApi($api)) {
+                    $sender->sendMessage(TF::GREEN . "API primária definida para: " . TF::WHITE . $api);
+                    $this->vpnChecker = new VPNChecker($this); // Reinicializa o checker com nova config
+                } else {
+                    $sender->sendMessage(TF::RED . "API inválida. Use proxycheck ou iphub.");
+                }
+                break;
+
+            case "setfallback":
+                if (count($args) < 2) {
+                    $sender->sendMessage(TF::RED . "Uso: /antivpn setfallback <api>");
+                    $sender->sendMessage(TF::YELLOW . "APIs disponíveis: proxycheck, iphub");
+                    return true;
+                }
+
+                $api = strtolower($args[1]);
+                if ($this->configManager->setFallbackApi($api)) {
+                    $sender->sendMessage(TF::GREEN . "API de fallback definida para: " . TF::WHITE . $api);
+                    $this->vpnChecker = new VPNChecker($this); // Reinicializa o checker com nova config
+                } else {
+                    $sender->sendMessage(TF::RED . "API inválida. Use proxycheck ou iphub.");
+                }
+                break;
+
+            case "api":
+                if (count($args) < 3) {
+                    $sender->sendMessage(TF::RED . "Uso: /antivpn api <api> <enable|disable>");
+                    $sender->sendMessage(TF::YELLOW . "APIs disponíveis: proxycheck, iphub");
+                    return true;
+                }
+
+                $api = strtolower($args[1]);
+                $action = strtolower($args[2]);
+
+                $enabled = false;
+                if ($action === "enable") {
+                    $enabled = true;
+                } else if ($action !== "disable") {
+                    $sender->sendMessage(TF::RED . "Ação inválida. Use 'enable' ou 'disable'.");
+                    return true;
+                }
+
+                if ($this->configManager->setApiEnabled($api, $enabled)) {
+                    $status = $enabled ? "habilitada" : "desabilitada";
+                    $sender->sendMessage(TF::GREEN . "API " . $api . " " . $status . " com sucesso!");
+                    $this->vpnChecker = new VPNChecker($this); // Reinicializa o checker com nova config
+                } else {
+                    $sender->sendMessage(TF::RED . "API inválida. Use proxycheck ou iphub.");
+                }
+                break;
+
+            case "setkey":
+                if (count($args) < 3) {
+                    $sender->sendMessage(TF::RED . "Uso: /antivpn setkey <api> <key>");
+                    $sender->sendMessage(TF::YELLOW . "APIs disponíveis: proxycheck, iphub");
+                    return true;
+                }
+
+                $api = strtolower($args[1]);
+                $key = $args[2];
+
+                if ($this->configManager->setApiKey($api, $key)) {
+                    $sender->sendMessage(TF::GREEN . "Chave de API para " . $api . " definida com sucesso!");
+                    $this->vpnChecker = new VPNChecker($this); // Reinicializa o checker com nova config
+                } else {
+                    $sender->sendMessage(TF::RED . "API inválida. Use proxycheck ou iphub.");
+                }
                 break;
 
             default:
