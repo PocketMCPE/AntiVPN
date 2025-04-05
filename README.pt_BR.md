@@ -73,20 +73,26 @@ api:
 ip-whitelist:
   - "127.0.0.1"
   - "192.168.1.1"
+
+# Lista de apelidos permitidos (nicks que serão ignorados na verificação)
+nicknames-whitelist:
+  - "Steve"
+  - "Alex"
 ```
 
 ### Comandos
 
-| Comando | Descrição |
-|---------|-----------|
-| `/antivpn` | Menu de ajuda |
+| Comando | Descrição                              |
+|---------|----------------------------------------|
+| `/antivpn` | Menu de ajuda                          |
 | `/antivpn check <player>` | Verifica se um jogador está usando VPN |
-| `/antivpn checkip <ip>` | Verifica se um IP está usando VPN |
-| `/antivpn reload` | Recarrega a configuração |
-| `/antivpn clearcache` | Limpa o cache de verificações |
-| `/antivpn stats` | Exibe estatísticas das APIs |
-| `/antivpn whitelist <add\|remove> <ip>` | Gerencia IPs na whitelist |
-| `/antivpn savecache` | Força o salvamento do cache |
+| `/antivpn checkip <ip>` | Verifica se um IP está usando VPN      |
+| `/antivpn reload` | Recarrega a configuração               |
+| `/antivpn clearcache` | Limpa o cache de verificações          |
+| `/antivpn stats` | Exibe estatísticas das APIs            |
+| `/antivpn whitelist <add\|remove> <ip>` | Gerencia IPs na whitelist              |
+| `/antivpn savecache` | Força o salvamento do cache            |
+| `/antivpn nickwhitelist <add\|remove> <nickname>` | Gerencia a lista de nicks permitidos   |
 
 ### Permissões
 

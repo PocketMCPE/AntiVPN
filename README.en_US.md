@@ -73,6 +73,11 @@ api:
 ip-whitelist:
   - "127.0.0.1"
   - "192.168.1.1"
+
+# Nickname Whitelist (nicknames that will be ignored in verification)
+nicknames-whitelist:
+  - "Steve"
+  - "Alex"
 ```
 
 ### Commands
@@ -87,6 +92,7 @@ ip-whitelist:
 | `/antivpn stats` | Displays API statistics |
 | `/antivpn whitelist <add\|remove> <ip>` | Manages IP whitelist |
 | `/antivpn savecache` | Forces cache saving |
+| `/antivpn nickwhitelist <add\|remove> <nickname>` | Manages nickname whitelist |
 
 ### Permissions
 

@@ -51,6 +51,19 @@ class ConfigManager {
     }
 
     /**
+     * Verifica se um jogador está na lista de permissões pelo apelido
+     * @param string $playerName
+     * @return bool
+     */
+    public function isNicknameWhitelisted($playerName) {
+        if (!isset($this->config['nicknames-whitelist']) || !is_array($this->config['nicknames-whitelist'])) {
+            return false;
+        }
+
+        return in_array(strtolower($playerName), array_map('strtolower', $this->config['nicknames-whitelist']));
+    }
+
+    /**
      * Obtém as configurações das APIs
      * @return array
      */
@@ -134,6 +147,28 @@ class ConfigManager {
     }
 
     /**
+     * Adiciona um apelido à lista de permissões
+     * @param string $playerName
+     * @return bool
+     */
+    public function addToNicknamesWhitelist($playerName) {
+        if (!isset($this->config['nicknames-whitelist']) || !is_array($this->config['nicknames-whitelist'])) {
+            $this->config['nicknames-whitelist'] = [];
+        }
+
+        $lowercasePlayerName = strtolower($playerName);
+        $lowercaseWhitelist = array_map('strtolower', $this->config['nicknames-whitelist']);
+
+        if (!in_array($lowercasePlayerName, $lowercaseWhitelist)) {
+            $this->config['nicknames-whitelist'][] = $playerName;
+            $this->saveConfig();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Remove um IP da whitelist
      * @param string $ip
      * @return bool
@@ -147,6 +182,30 @@ class ConfigManager {
         if ($key !== false) {
             unset($this->config['ip-whitelist'][$key]);
             $this->config['ip-whitelist'] = array_values($this->config['ip-whitelist']); // Reindexar array
+            $this->saveConfig();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Remove um apelido da lista de permissões
+     * @param string $playerName
+     * @return bool
+     */
+    public function removeFromNicknamesWhitelist($playerName) {
+        if (!isset($this->config['nicknames-whitelist']) || !is_array($this->config['nicknames-whitelist'])) {
+            return false;
+        }
+
+        $lowercasePlayerName = strtolower($playerName);
+        $lowercaseWhitelist = array_map('strtolower', $this->config['nicknames-whitelist']);
+
+        $key = array_search($lowercasePlayerName, $lowercaseWhitelist);
+        if ($key !== false) {
+            unset($this->config['nicknames-whitelist'][$key]);
+            $this->config['nicknames-whitelist'] = array_values($this->config['nicknames-whitelist']);
             $this->saveConfig();
             return true;
         }

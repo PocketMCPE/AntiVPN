@@ -38,8 +38,9 @@ class PlayerJoinListener implements Listener {
             return;
         }
 
-        if ($this->plugin->getConfigManager()->isWhitelisted($ip)) {
-            $this->logAction($playerName, $ip, "IP na whitelist");
+        if ($this->plugin->getConfigManager()->isWhitelisted($ip) ||
+            $this->plugin->getConfigManager()->isNicknameWhitelisted($playerName)) {
+            $this->logAction($playerName, $ip, "IP ou nickname na whitelist");
             return;
         }
 

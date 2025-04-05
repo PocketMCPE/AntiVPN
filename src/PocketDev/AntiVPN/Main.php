@@ -236,6 +236,7 @@ class Main extends PluginBase {
             $sender->sendMessage(TF::YELLOW . "/antivpn clearcache " . TF::WHITE . "- Limpa o cache de verificações");
             $sender->sendMessage(TF::YELLOW . "/antivpn stats " . TF::WHITE . "- Exibe estatísticas das APIs");
             $sender->sendMessage(TF::YELLOW . "/antivpn whitelist <add|remove> <ip> " . TF::WHITE . "- Gerencia IPs na whitelist");
+            $sender->sendMessage(TF::YELLOW . "/antivpn nickwhitelist <add|remove> <nickname> " . TF::WHITE . "- Gerencia nicknames na whitelist");
             $sender->sendMessage(TF::YELLOW . "/antivpn savecache " . TF::WHITE . "- Força o salvamento do cache");
             return true;
         }
@@ -297,6 +298,32 @@ class Main extends PluginBase {
                         $sender->sendMessage(TF::GREEN . "IP $ip removido da whitelist.");
                     } else {
                         $sender->sendMessage(TF::YELLOW . "IP $ip não estava na whitelist.");
+                    }
+                } else {
+                    $sender->sendMessage(TF::RED . "Ação inválida. Use 'add' ou 'remove'.");
+                }
+                break;
+
+            case "nickwhitelist":
+                if (count($args) < 3) {
+                    $sender->sendMessage(TF::RED . "Uso: /antivpn nickwhitelist <add|remove> <nickname>");
+                    return true;
+                }
+
+                $action = strtolower($args[1]);
+                $nickname = $args[2];
+
+                if ($action === "add") {
+                    if ($this->configManager->addToNicknamesWhitelist($nickname)) {
+                        $sender->sendMessage(TF::GREEN . "Nickname $nickname adicionado à whitelist.");
+                    } else {
+                        $sender->sendMessage(TF::YELLOW . "Nickname $nickname já está na whitelist.");
+                    }
+                } else if ($action === "remove") {
+                    if ($this->configManager->removeFromNicknamesWhitelist($nickname)) {
+                        $sender->sendMessage(TF::GREEN . "Nickname $nickname removido da whitelist.");
+                    } else {
+                        $sender->sendMessage(TF::YELLOW . "Nickname $nickname não estava na whitelist.");
                     }
                 } else {
                     $sender->sendMessage(TF::RED . "Ação inválida. Use 'add' ou 'remove'.");
